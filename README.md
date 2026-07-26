@@ -114,6 +114,10 @@ hallucination" and provenance *structural*.
   - `paisai.api` — FastAPI service with the **Provenance & Validation Middleware**
     that fails honest if any numeric would leave the server un-sourced; missing
     market data returns an explicit "unavailable" state, never a fabricated price.
+  - `paisai.journal` — the **Decision Journal** signature feature: structured
+    entries, thesis-vs-reality review that never guesses an unobserved outcome,
+    and a transparent, process-based Decision Quality Score (judgement, not
+    returns).
 - CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) — every change is
   gated by the backend integrity tests and the frontend production build.
 - [`frontend/`](frontend) — the Next.js + TypeScript + Tailwind web client,
