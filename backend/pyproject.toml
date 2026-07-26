@@ -6,17 +6,28 @@ build-backend = "setuptools.build_meta"
 name = "paisai"
 version = "0.1.0"
 description = "PAISAI backend — the trust-enforcing core of an AI Financial Operating System."
-readme = "../README.md"
+readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "Proprietary" }
+# The integrity core and calculation engine depend only on the standard library,
+# so they can be imported and tested anywhere with no install.
 dependencies = []
 
 [project.optional-dependencies]
-# The integrity core and calculation engine depend only on the standard library
-# so they can be tested anywhere. API/runtime dependencies are added as those
-# layers are built (see docs/ARCHITECTURE.md): fastapi, uvicorn, pydantic,
-# sqlalchemy, redis, celery, etc.
-dev = ["pytest>=8"]
+# The HTTP API layer. Further runtime deps (sqlalchemy, redis, celery, …) are
+# added as those subsystems are built — see docs/ARCHITECTURE.md.
+api = [
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.29",
+    "pydantic>=2.6",
+]
+dev = [
+    "pytest>=8",
+    "httpx>=0.27",
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.29",
+    "pydantic>=2.6",
+]
 
 [tool.setuptools.packages.find]
 where = ["."]
