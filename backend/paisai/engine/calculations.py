@@ -82,6 +82,28 @@ def cagr(
     )
 
 
+def net_worth(
+    assets: ProvenancedValue,
+    liabilities: ProvenancedValue,
+    *,
+    label: str = "Net worth",
+) -> ProvenancedValue:
+    """Net worth = total assets - total liabilities.
+
+    Can be negative (liabilities exceed assets) — an honest result, returned as-is.
+    """
+    _require_clean(assets, liabilities)
+    result = assets.value - liabilities.value
+    return ProvenancedValue(
+        value=result,
+        provenance=Provenance.CALCULATED,
+        label=label,
+        unit=assets.unit or "currency",
+        method="net_worth = assets - liabilities",
+        inputs=(assets, liabilities),
+    )
+
+
 def savings_rate(
     income: ProvenancedValue,
     expenses: ProvenancedValue,

@@ -9,12 +9,14 @@ these figures; it never invents them.
 from .calculations import (
     cagr,
     emergency_fund_months,
+    net_worth,
     portfolio_weights,
     savings_rate,
 )
 
 __all__ = [
     "cagr",
+    "net_worth",
     "savings_rate",
     "portfolio_weights",
     "emergency_fund_months",
