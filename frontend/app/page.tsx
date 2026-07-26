@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Wordmark } from "@/components/Wordmark";
 import {
   ProvenancedFigure,
@@ -22,6 +23,20 @@ export default function Home() {
         <p className="mt-4 text-lg text-muted">
           Your AI Financial Operating System.
         </p>
+        <nav className="mt-6 flex gap-3 text-sm">
+          <Link
+            href="/dashboard"
+            className="rounded-sm border border-verified/60 px-3 py-1.5 text-verified hover:bg-verified/10"
+          >
+            Open Dashboard →
+          </Link>
+          <Link
+            href="/journal"
+            className="rounded-sm border border-line/60 px-3 py-1.5 text-muted hover:text-paper"
+          >
+            Decision Journal →
+          </Link>
+        </nav>
         <p className="mt-6 max-w-2xl text-sm leading-relaxed text-paper/80">
           The most trustworthy AI-powered personal finance platform ever built.
           Not the smartest. Not the flashiest. The most trustworthy. Every
