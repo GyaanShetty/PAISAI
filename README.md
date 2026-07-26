@@ -99,10 +99,20 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full design.
 
 ## Project status
 
-**Foundational.** This branch commits the founding principles and the
-documentation constitution. Application code will be built strictly on top of
-these documents — every module inherits the data-integrity and behaviour
-contracts defined here. Nothing ships that violates them.
+**Foundational, with the trust core in code.** This branch commits the founding
+principles, the documentation constitution, and the first executable layer of the
+backend: the integrity core and deterministic calculation engine that make "no
+hallucination" and provenance *structural*.
+
+- [`backend/`](backend) — the trust-enforcing core (standard-library only, fully
+  tested: `41 passed`). See [`backend/README.md`](backend/README.md).
+  - `paisai.integrity` — provenance categories, `ProvenancedValue` / `Unavailable`,
+    the `ensure_provenanced()` guardrail that refuses un-sourced numerics, and the
+    required anatomy of an `Answer`.
+  - `paisai.engine` — deterministic financial math; provenance flows through every
+    calculation, and undefined cases raise rather than return a misleading number.
+
+Every future module inherits these contracts. Nothing ships that violates them.
 
 ---
 
