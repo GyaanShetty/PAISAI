@@ -104,7 +104,7 @@ principles, the documentation constitution, and the first executable layer of th
 backend: the integrity core and deterministic calculation engine that make "no
 hallucination" and provenance *structural*.
 
-- [`backend/`](backend) — the trust-enforcing core and API (tested: `52 passed`).
+- [`backend/`](backend) — the trust-enforcing core and API (tested: `72 passed`).
   See [`backend/README.md`](backend/README.md).
   - `paisai.integrity` — provenance categories, `ProvenancedValue` / `Unavailable`,
     the `ensure_provenanced()` guardrail that refuses un-sourced numerics, and the
@@ -118,6 +118,9 @@ hallucination" and provenance *structural*.
     entries, thesis-vs-reality review that never guesses an unobserved outcome,
     and a transparent, process-based Decision Quality Score (judgement, not
     returns).
+  - `paisai.persistence` — SQLAlchemy storage (SQLite for tests, Postgres in
+    prod) with an **append-only, hash-chained audit log**: altering any past
+    record breaks the chain, so tampering is *detectable*, not just discouraged.
 - CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) — every change is
   gated by the backend integrity tests and the frontend production build.
 - [`frontend/`](frontend) — the Next.js + TypeScript + Tailwind web client,
