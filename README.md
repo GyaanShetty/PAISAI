@@ -111,6 +111,10 @@ hallucination" and provenance *structural*.
     required anatomy of an `Answer`.
   - `paisai.engine` — deterministic financial math; provenance flows through every
     calculation, and undefined cases raise rather than return a misleading number.
+- [`frontend/`](frontend) — the Next.js + TypeScript + Tailwind web client,
+  Vercel-deployable, embodying the design language (production build verified).
+  See [`frontend/README.md`](frontend/README.md). Provenance chips make fact vs.
+  forecast visible; missing data renders as an honest "No verified data."
 
 Every future module inherits these contracts. Nothing ships that violates them.
 
