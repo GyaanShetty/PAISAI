@@ -32,8 +32,9 @@ backend/
 │   └── marketdata/         # the Market Data Gateway
 │       ├── provider.py     # provider protocol; NullProvider (honest default)
 │       ├── gateway.py      # provenance + caching + fail-honest; configure_provider
+│       ├── amfi.py         # real provider: AMFI mutual-fund NAVs (no key, opt-in)
 │       └── example_http_provider.py  # a template adapter (not active)
-├── tests/                  # 90 tests covering the invariants above
+├── tests/                  # 97 tests covering the invariants above
 ├── examples/demo.py        # runnable tour of the core
 └── pyproject.toml
 ```
@@ -76,7 +77,7 @@ cd backend
 
 # Full suite (integrity core + engine + API)
 python -m pip install -e ".[dev]"
-python -m pytest                      # -> 90 passed
+python -m pytest                      # -> 97 passed
 
 # The core-only demo (standard library, no install needed)
 PYTHONPATH=. python examples/demo.py
@@ -90,7 +91,7 @@ uvicorn paisai.api.app:app --reload   # http://127.0.0.1:8000/health
 #   GET  /v1/market/quote?symbol=ACME   -> honest "unavailable"
 ```
 
-Expected: `90 passed`, a demo that shows provenance flowing through calculations
+Expected: `97 passed`, a demo that shows provenance flowing through calculations
 (an un-sourced number refused, missing data admitted rather than invented), and an
 API that returns provenanced figures — or an honest 500 if anything tries to leak
 a bare number.

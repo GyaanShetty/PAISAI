@@ -22,6 +22,7 @@ from .provider import (
     RawDatum,
 )
 from .gateway import MarketDataGateway, configure_provider, get_gateway
+from .amfi import AmfiNavProvider
 
 __all__ = [
     "RawDatum",
@@ -31,4 +32,6 @@ __all__ = [
     "MarketDataGateway",
     "configure_provider",
     "get_gateway",
+    "AmfiNavProvider",
 ]
+

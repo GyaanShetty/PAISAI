@@ -22,9 +22,26 @@ Code: [`backend/paisai/marketdata/`](../backend/paisai/marketdata).
 Results are cached for a short TTL (default 60s) to avoid hammering the provider;
 a cached value keeps its original `as_of`.
 
-**No vendor is bundled.** Out of the box every lookup is `Unavailable`. That is
-correct: PAISAI would rather say "I don't have verified data for this" than show a
-number it cannot source.
+**Default is honest-unavailable.** With no provider configured, every lookup is
+`Unavailable`: PAISAI would rather say "I don't have verified data for this" than
+show a number it cannot source.
+
+### Bundled real provider: AMFI mutual-fund NAVs (no key)
+
+AMFI (Association of Mutual Funds in India) publishes the official daily NAV of
+every Indian mutual-fund scheme as a public, authoritative feed — so it is a
+legitimate `Verified` source that needs **no API key**. PAISAI ships an adapter
+for it (`paisai.marketdata.amfi.AmfiNavProvider`), enabled opt-in:
+
+```bash
+PAISAI_ENABLE_AMFI=1 uvicorn paisai.api.app:app   # or set it in the environment
+```
+
+With it enabled, `GET /v1/fund/{scheme_code}` returns the real NAV as a `Verified`
+value sourced from AMFI with the date AMFI reported it (e.g. scheme `119551`). It
+is **off by default** so tests/CI run without network; a deployment opts in and
+must allow outbound access to `amfiindia.com`. Equities (`get_quote`) remain
+`Unavailable` — AMFI is a funds source only.
 
 ---
 
