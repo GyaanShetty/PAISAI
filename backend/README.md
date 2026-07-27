@@ -25,11 +25,15 @@ backend/
 │   │   ├── app.py          # endpoints + Provenance & Validation Middleware
 │   │   └── integrity_response.py  # serialized-form no-hallucination guard
 │   ├── journal/            # the Decision Journal (models, review, quality score)
-│   └── persistence/        # SQLAlchemy storage
-│       ├── db.py           # engine/session (SQLite for tests, Postgres in prod)
-│       ├── audit.py        # append-only, hash-chained, tamper-evident audit log
-│       └── journal_repository.py  # entry storage; audits every write
-├── tests/                  # 72 tests covering the invariants above
+│   ├── persistence/        # SQLAlchemy storage
+│   │   ├── db.py           # engine/session (SQLite for tests, Postgres in prod)
+│   │   ├── audit.py        # append-only, hash-chained, tamper-evident audit log
+│   │   └── journal_repository.py  # entry storage; audits every write
+│   └── marketdata/         # the Market Data Gateway
+│       ├── provider.py     # provider protocol; NullProvider (honest default)
+│       ├── gateway.py      # provenance + caching + fail-honest; configure_provider
+│       └── example_http_provider.py  # a template adapter (not active)
+├── tests/                  # 90 tests covering the invariants above
 ├── examples/demo.py        # runnable tour of the core
 └── pyproject.toml
 ```
@@ -72,7 +76,7 @@ cd backend
 
 # Full suite (integrity core + engine + API)
 python -m pip install -e ".[dev]"
-python -m pytest                      # -> 72 passed
+python -m pytest                      # -> 90 passed
 
 # The core-only demo (standard library, no install needed)
 PYTHONPATH=. python examples/demo.py
@@ -86,7 +90,7 @@ uvicorn paisai.api.app:app --reload   # http://127.0.0.1:8000/health
 #   GET  /v1/market/quote?symbol=ACME   -> honest "unavailable"
 ```
 
-Expected: `72 passed`, a demo that shows provenance flowing through calculations
+Expected: `90 passed`, a demo that shows provenance flowing through calculations
 (an un-sourced number refused, missing data admitted rather than invented), and an
 API that returns provenanced figures — or an honest 500 if anything tries to leak
 a bare number.
