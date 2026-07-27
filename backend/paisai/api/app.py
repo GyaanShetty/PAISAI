@@ -32,7 +32,7 @@ from ..dashboard import DashboardInput, build_dashboard
 from ..engine import cagr, emergency_fund_months, portfolio_weights, savings_rate
 from ..integrity.epistemics import Confidence
 from ..integrity.provenance import IntegrityError, unavailable, user_provided
-from ..marketdata import get_gateway
+from ..marketdata import configure_provider, get_gateway
 from ..journal.models import Action, Alternative, Assumption, DecisionEntry, RiskFactor
 from ..persistence.audit import AuditLog, TamperError
 from ..persistence.journal_repository import JournalRepository
@@ -187,6 +187,15 @@ def create_app() -> FastAPI:
         allow_methods=["GET", "POST"],
         allow_headers=["*"],
     )
+
+    # Opt-in real data: AMFI publishes official Indian mutual-fund NAVs publicly
+    # (no key). Enabled only when PAISAI_ENABLE_AMFI is set, so tests/CI stay
+    # network-free and deployments choose explicitly. Fund NAVs then arrive
+    # Verified with AMFI as the source; failures fall back to honest Unavailable.
+    if os.environ.get("PAISAI_ENABLE_AMFI", "").lower() in ("1", "true", "yes"):
+        from ..marketdata import AmfiNavProvider
+
+        configure_provider(AmfiNavProvider())
 
     # -- health ------------------------------------------------------------- #
     @app.get("/health")
