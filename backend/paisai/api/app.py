@@ -32,6 +32,7 @@ from ..dashboard import DashboardInput, build_dashboard
 from ..engine import cagr, emergency_fund_months, portfolio_weights, savings_rate
 from ..integrity.epistemics import Confidence
 from ..integrity.provenance import IntegrityError, unavailable, user_provided
+from ..marketdata import get_gateway
 from ..journal.models import Action, Alternative, Assumption, DecisionEntry, RiskFactor
 from ..persistence.audit import AuditLog, TamperError
 from ..persistence.journal_repository import JournalRepository
@@ -314,18 +315,43 @@ def create_app() -> FastAPI:
             )
         return {"intact": True, "records_checked": log.count()}
 
-    # -- market data (honest unavailable) ----------------------------------- #
+    # -- market data (through the gateway) ---------------------------------- #
     @app.get("/v1/market/quote")
     def market_quote(symbol: str) -> Any:
+        # Routed through the Market Data Gateway: a Verified value when a provider
+        # is configured, an honest Unavailable otherwise. Never a fabricated price.
+        return {"symbol": symbol, "quote": get_gateway().quote(symbol).to_dict()}
+
+    @app.get("/v1/stock/{symbol}")
+    def stock_analysis(symbol: str) -> Any:
+        quote = get_gateway().quote(symbol)
         return {
             "symbol": symbol,
-            "quote": unavailable(
-                label=f"Live quote for {symbol}",
+            "quote": quote.to_dict(),
+            # Fundamental analysis (revenue, margins, ROE, valuation, …) requires a
+            # provider that supplies fundamentals. None is configured, so those are
+            # honestly withheld rather than fabricated.
+            "fundamentals": unavailable(
+                label=f"Fundamentals for {symbol}",
                 reason=(
-                    "No verified market-data provider is connected in this build; "
-                    "I don't have verified data for this."
+                    "Fundamental data requires a configured fundamentals provider; "
+                    "none is connected in this build."
                 ),
             ).to_dict(),
+            "limitations": [
+                "Quote reflects the configured provider only; unavailable if none.",
+                "No fundamental/valuation analysis until a fundamentals provider is wired.",
+            ],
+        }
+
+    @app.get("/v1/fund/{scheme_code}")
+    def fund_analysis(scheme_code: str) -> Any:
+        return {
+            "scheme_code": scheme_code,
+            "nav": get_gateway().nav(scheme_code).to_dict(),
+            "limitations": [
+                "NAV reflects the configured provider only; unavailable if none.",
+            ],
         }
 
     return app
