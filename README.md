@@ -104,7 +104,7 @@ principles, the documentation constitution, and the first executable layer of th
 backend: the integrity core and deterministic calculation engine that make "no
 hallucination" and provenance *structural*.
 
-- [`backend/`](backend) — the trust-enforcing core and API (tested: `90 passed`).
+- [`backend/`](backend) — the trust-enforcing core and API (tested: `97 passed`).
   See [`backend/README.md`](backend/README.md).
   - `paisai.integrity` — provenance categories, `ProvenancedValue` / `Unavailable`,
     the `ensure_provenanced()` guardrail that refuses un-sourced numerics, and the
