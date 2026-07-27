@@ -28,6 +28,8 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://paisai:paisai@db:5432/paisai
       PAISAI_CORS_ORIGINS: http://localhost:3000
+      # Real, keyless mutual-fund NAVs from AMFI (needs outbound amfiindia.com).
+      PAISAI_ENABLE_AMFI: "1"
     ports:
       - "8000:8000"
     depends_on:
