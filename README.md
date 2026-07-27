@@ -104,7 +104,7 @@ principles, the documentation constitution, and the first executable layer of th
 backend: the integrity core and deterministic calculation engine that make "no
 hallucination" and provenance *structural*.
 
-- [`backend/`](backend) — the trust-enforcing core and API (tested: `80 passed`).
+- [`backend/`](backend) — the trust-enforcing core and API (tested: `90 passed`).
   See [`backend/README.md`](backend/README.md).
   - `paisai.integrity` — provenance categories, `ProvenancedValue` / `Unavailable`,
     the `ensure_provenanced()` guardrail that refuses un-sourced numerics, and the
@@ -121,6 +121,11 @@ hallucination" and provenance *structural*.
   - `paisai.persistence` — SQLAlchemy storage (SQLite for tests, Postgres in
     prod) with an **append-only, hash-chained audit log**: altering any past
     record breaks the chain, so tampering is *detectable*, not just discouraged.
+  - `paisai.marketdata` — the **Market Data Gateway**: the single choke point
+    through which all external prices/NAVs flow, tagged `Verified` with source and
+    freshness. No vendor is bundled, so lookups are honestly `Unavailable` until a
+    provider is wired (see [`docs/MARKET_DATA_GATEWAY.md`](docs/MARKET_DATA_GATEWAY.md));
+    it fails honest on provider errors, never a fabricated figure.
 - CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) — every change is
   gated by the backend integrity tests and the frontend production build.
 - [`frontend/`](frontend) — the Next.js + TypeScript + Tailwind web client,
