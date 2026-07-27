@@ -1,9 +1,13 @@
-"""Product endpoints: dashboard, decision journal, and audit — end to end."""
+"""Product endpoints: dashboard, decision journal, audit, market data — end to end."""
+
+from datetime import datetime, timezone
+from typing import Optional
 
 import pytest
 from fastapi.testclient import TestClient
 
 from paisai.api import create_app
+from paisai.marketdata import RawDatum, configure_provider
 from paisai.persistence.db import init_engine
 
 
@@ -12,6 +16,24 @@ def client() -> TestClient:
     # Isolated in-memory database so journal/audit routes persist within the test.
     init_engine("sqlite+pysqlite:///:memory:")
     return TestClient(create_app())
+
+
+@pytest.fixture(autouse=True)
+def _reset_provider():
+    # Ensure no provider leaks between tests; default is honest-unavailable.
+    configure_provider(None)
+    yield
+    configure_provider(None)
+
+
+class _FakeProvider:
+    name = "fake"
+
+    def get_quote(self, symbol: str) -> Optional[RawDatum]:
+        return RawDatum(2500.0, "INR", "FakeExchange", datetime(2026, 1, 1, tzinfo=timezone.utc))
+
+    def get_nav(self, scheme_code: str) -> Optional[RawDatum]:
+        return None
 
 
 def _entry_payload(**overrides) -> dict:
@@ -119,6 +141,39 @@ def test_audit_verify_reflects_journal_writes(client):
     after = client.get("/v1/audit/verify")
     assert after.json()["intact"] is True
     assert after.json()["records_checked"] == 1
+
+
+# --- market data through the gateway ----------------------------------------
+
+
+def test_market_quote_unavailable_without_provider(client):
+    r = client.get("/v1/market/quote", params={"symbol": "ACME"})
+    assert r.status_code == 200
+    assert r.json()["quote"]["available"] is False
+
+
+def test_stock_endpoint_unavailable_without_provider(client):
+    r = client.get("/v1/stock/RELIANCE")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["quote"]["available"] is False
+    assert body["fundamentals"]["available"] is False
+
+
+def test_stock_endpoint_verified_with_provider(client):
+    configure_provider(_FakeProvider())
+    r = client.get("/v1/stock/RELIANCE")
+    assert r.status_code == 200
+    quote = r.json()["quote"]
+    assert quote["provenance"] == "Verified"
+    assert quote["value"] == 2500.0
+    assert quote["source"] == "FakeExchange"
+
+
+def test_fund_endpoint_unavailable_without_provider(client):
+    r = client.get("/v1/fund/120503")
+    assert r.status_code == 200
+    assert r.json()["nav"]["available"] is False
 
 
 def test_structural_counts_pass_the_boundary_middleware(client):
