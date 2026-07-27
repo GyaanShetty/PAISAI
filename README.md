@@ -104,7 +104,7 @@ principles, the documentation constitution, and the first executable layer of th
 backend: the integrity core and deterministic calculation engine that make "no
 hallucination" and provenance *structural*.
 
-- [`backend/`](backend) — the trust-enforcing core and API (tested: `72 passed`).
+- [`backend/`](backend) — the trust-enforcing core and API (tested: `80 passed`).
   See [`backend/README.md`](backend/README.md).
   - `paisai.integrity` — provenance categories, `ProvenancedValue` / `Unavailable`,
     the `ensure_provenanced()` guardrail that refuses un-sourced numerics, and the
@@ -125,10 +125,57 @@ hallucination" and provenance *structural*.
   gated by the backend integrity tests and the frontend production build.
 - [`frontend/`](frontend) — the Next.js + TypeScript + Tailwind web client,
   Vercel-deployable, embodying the design language (production build verified).
-  See [`frontend/README.md`](frontend/README.md). Provenance chips make fact vs.
-  forecast visible; missing data renders as an honest "No verified data."
+  See [`frontend/README.md`](frontend/README.md). A **Dashboard** page (inputs →
+  provenanced results) and a **Decision Journal** page are wired to the API;
+  provenance chips make fact vs. forecast visible and missing data renders as an
+  honest "No verified data."
+- Run tooling — [`docker-compose.yml`](docker-compose.yml) (Postgres + API +
+  frontend) and [`scripts/dev.sh`](scripts/dev.sh) for a no-Docker local run.
 
 Every future module inherits these contracts. Nothing ships that violates them.
+
+---
+
+## Run the product locally
+
+The backend and frontend run together as a working application. A user can enter
+their figures and see a dashboard where **every value carries its provenance**,
+record decisions in the **Decision Journal**, and verify the **audit chain** — and
+anything requiring live market data renders as an honest "unavailable", never a
+fabricated number.
+
+**Option A — one command (Docker):**
+
+```bash
+docker compose up --build
+# frontend → http://localhost:3000   API → http://localhost:8000
+```
+
+This brings up PostgreSQL, the FastAPI backend, and the Next.js frontend together;
+the audit log and journal persist across restarts.
+
+**Option B — no Docker (SQLite):**
+
+```bash
+./scripts/dev.sh          # starts backend (:8000) and frontend (:3000)
+```
+
+**Or run each side yourself:**
+
+```bash
+# backend
+cd backend && pip install -e ".[api]" && uvicorn paisai.api.app:app --port 8000
+# frontend (separate shell)
+cd frontend && npm install && NEXT_PUBLIC_API_BASE_URL=http://localhost:8000 npm run dev
+```
+
+Key endpoints: `POST /v1/dashboard`, `POST /v1/journal`, `GET /v1/journal/review-due`,
+`GET /v1/audit/verify`, `GET /v1/market/quote` (honest "unavailable").
+
+> The `Dockerfile`/`docker-compose.yml` are provided for one-command runs; they
+> were not executed in the authoring environment (no Docker daemon there). The
+> local path (`scripts/dev.sh` / `uvicorn` + `npm`) was verified end to end against
+> a running backend.
 
 ---
 

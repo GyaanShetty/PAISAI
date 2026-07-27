@@ -13,6 +13,7 @@ from typing import Optional
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
+from sqlalchemy.pool import StaticPool
 
 
 class Base(DeclarativeBase):
@@ -31,8 +32,14 @@ def init_engine(url: Optional[str] = None, *, echo: bool = False) -> Engine:
     """
     global _engine, _Session
     resolved = url or os.environ.get("DATABASE_URL") or "sqlite+pysqlite:///paisai.db"
-    connect_args = {"check_same_thread": False} if resolved.startswith("sqlite") else {}
-    _engine = create_engine(resolved, echo=echo, future=True, connect_args=connect_args)
+    kwargs: dict = {"echo": echo, "future": True}
+    if resolved.startswith("sqlite"):
+        kwargs["connect_args"] = {"check_same_thread": False}
+        # An in-memory database is per-connection; share one connection across
+        # threads (e.g. the test client's worker) so the schema is visible.
+        if ":memory:" in resolved:
+            kwargs["poolclass"] = StaticPool
+    _engine = create_engine(resolved, **kwargs)
     _Session = sessionmaker(bind=_engine, expire_on_commit=False, future=True)
     Base.metadata.create_all(_engine)
     return _engine

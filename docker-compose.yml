@@ -1,0 +1,52 @@
+# One-command local product: PostgreSQL + the PAISAI API + the Next.js frontend.
+#
+#   docker compose up --build
+#
+# Then open http://localhost:3000 (frontend) — it talks to the API on :8000.
+# The API persists to Postgres; the audit chain and journal survive restarts.
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: paisai
+      POSTGRES_PASSWORD: paisai
+      POSTGRES_DB: paisai
+    ports:
+      - "5432:5432"
+    volumes:
+      - paisai_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U paisai"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://paisai:paisai@db:5432/paisai
+      PAISAI_CORS_ORIGINS: http://localhost:3000
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    image: node:20-alpine
+    working_dir: /app
+    command: sh -c "npm ci && npm run dev"
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  paisai_pgdata:
