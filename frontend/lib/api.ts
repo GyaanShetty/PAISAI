@@ -20,6 +20,7 @@ export interface ProvenancedValue {
   label?: string;
   unit?: string;
   source?: string;
+  as_of?: string;
   method?: string;
   note?: string;
   inputs?: ProvenancedValue[];
@@ -135,6 +136,11 @@ export const api = {
   verifyAudit: () =>
     request<{ intact: boolean; records_checked?: number; detail?: string }>(
       "/v1/audit/verify",
+    ),
+
+  fund: (schemeCode: string) =>
+    request<{ scheme_code: string; nav: Figure; limitations: string[] }>(
+      `/v1/fund/${encodeURIComponent(schemeCode)}`,
     ),
 };
 

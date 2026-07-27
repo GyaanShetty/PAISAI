@@ -8,11 +8,12 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cleanup() { kill 0 2>/dev/null || true; }
 trap cleanup EXIT INT TERM
 
-echo "→ Starting backend on http://localhost:8000"
+echo "→ Starting backend on http://localhost:8000 (real AMFI fund NAVs enabled)"
 (
   cd "$ROOT/backend"
   python -m pip install -q -e ".[api]"
-  exec uvicorn paisai.api.app:app --port 8000
+  # Enable the keyless AMFI provider so fund NAVs are real out of the box.
+  PAISAI_ENABLE_AMFI=1 exec uvicorn paisai.api.app:app --port 8000
 ) &
 
 echo "→ Starting frontend on http://localhost:3000"
