@@ -36,6 +36,12 @@ export default function Home() {
           >
             Decision Journal →
           </Link>
+          <Link
+            href="/funds"
+            className="rounded-sm border border-line/60 px-3 py-1.5 text-muted hover:text-paper"
+          >
+            Fund NAV →
+          </Link>
         </nav>
         <p className="mt-6 max-w-2xl text-sm leading-relaxed text-paper/80">
           The most trustworthy AI-powered personal finance platform ever built.
